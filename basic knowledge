@@ -1,0 +1,21 @@
+### 使用suppressMesage运行的时候不提示信息
+suppressMessages({                          
+library(base)
+library(argparser, quietly=TRUE)
+library(Seurat)
+library(dplyr)
+library(nichenetr)
+library(tidyverse)
+})
+
+### R环境中调用python
+library(reticulate)
+#指定python路径
+use_python('/your path/',required = T)
+repl_python()
+##进入python命令，可以在R studio中交互使用python
+import pandas as pd
+# 回到R
+exit
+###调用python里面的变量
+x <- python$zhao
