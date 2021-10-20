@@ -1,0 +1,199 @@
+### multiple regression plot (for the purpose of picking similar drugs)
+library(tidyverse)
+library(ggplot2)
+library(car)
+library(GGally)
+
+### VE-822 (Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4)
+LY2606368 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4/LY2606368-VE822.csv")
+litronesib <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4/litronesib-VE822.csv")
+vinflunine <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4/vinflunine-VE822.csv")
+AZ20 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4/AZ20-VE822.csv")
+verubulin <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug sensitivity (PRISM Repurposing Primary Screen) 19Q4/verubulin-VE822.csv")
+
+VE822_19Q4 <- cbind(verubulin[,1],verubulin[,2])
+LY2606368 <- cbind(LY2606368[,1],LY2606368[,3])
+litronesib <- cbind(litronesib[,1],litronesib[,3])
+vinflunine <- cbind(vinflunine[,1],vinflunine[,3])
+AZ20 <- cbind(AZ20[,1],AZ20[,3])
+verubulin <- cbind(verubulin[,1],verubulin[,3])
+
+VE_dataset <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(VE822_19Q4, AZ20, litronesib, LY2606368, verubulin, vinflunine), accumulate = FALSE)
+colnames(VE_dataset) <- c("ID", "VE822", "AZ20", "litronesib", "LY2606368", "verubulin", "vinflunine")
+VE_dataset %>% ggpairs(columns = c("VE822", "AZ20", "litronesib", "LY2606368", "verubulin", "vinflunine"), upper = list(continuous = wrap('cor', size = 8)))
+
+ggpairs(VE_dataset,
+        title="VE-822 (19Q4)",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+### VE-822 (Drug sensitivity AUC (Sanger GDSC2))
+entinostat <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug_sensitivity_AUC_Sanger_GDSC2/entinostat_VE822.csv")
+mitoxantrone <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug_sensitivity_AUC_Sanger_GDSC2/mitoxantrone_VE822.csv")
+AZD6738 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug_sensitivity_AUC_Sanger_GDSC2/AZD6738_VE822.csv")
+AZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug_sensitivity_AUC_Sanger_GDSC2/AZD7762_VE822.csv")
+MK_1775 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/VE822_Drug_sensitivity_AUC_Sanger_GDSC2/MK-1775_VE822.csv")
+
+VE822_sanger <- cbind(AZD7762[,1], AZD7762[,2])
+entinostat <- cbind(entinostat[,1], entinostat[,3])
+mitoxantrone <- cbind(mitoxantrone[,1], mitoxantrone[,3])
+AZD6738 <- cbind(AZD6738[,1], AZD6738[,3])
+AZD7762 <- cbind(AZD7762[,1], AZD7762[,3])
+MK_1775_sanger <- cbind(MK_1775[,1], MK_1775[,3])
+
+VE_dataset_drug <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(VE822, entinostat, mitoxantrone, AZD6738, AZD7762, MK_1775_sanger), accumulate = FALSE)
+colnames(VE_dataset_drug) <- c("ID", "VE822", "entinostat", "mitoxantrone", "AZD6738", "AZD7762", "MK_1775_sanger")
+ggpairs(VE_dataset_drug,
+        title="VE-822 (Sanger)",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+################################
+VE_dataset_drug <- cbind(entinostat[,2], entinostat[,3], mitoxantrone[,3], AZD6738[,3], AZD7762[,3], MK_1775[,3])
+colnames(VE_dataset_drug) <- c("VE822", "entinostat", "mitoxantrone", "AZD6738", "AZD7762", "MK_1775")
+VE_dataset_drug %>% ggpairs(columns = c("VE822", "entinostat", "mitoxantrone", "AZD6738", "AZD7762", "MK_1775"), upper = list(continuous = wrap('cor', size = 8)))
+
+XXX <- cbind(mitoxantrone[,2],mitoxantrone[,3])
+colnames(XXX) <- c("VE822", "mitoxantrone")
+XXX %>% ggpairs(columns = c("VE822", "mitoxantrone"), upper = list(continuous = wrap('cor', size = 8)))
+
+
+XXX %>% mutate(V2 = factor(V2)) %>%
+  ggpairs(columns = c("V1", "V2"), 
+          aes(color = cyl),
+          upper = list(continuous = wrap('cor', size = 5)),
+          lower = list(combo = wrap("facethist", bins = 30)),
+          diag = list(continuous = wrap("densityDiag", alpha = 0.5)))
+################################
+
+### MK1775 (Drug sensitivity AUC (CTD^2))
+tivantinib <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775 (Drug sensitivity AUC (CTD^2))/tivantinib (CTRP687406) AUC Drug sensitivity AUC (CTD^2) vs MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2).csv")
+docetaxel <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775 (Drug sensitivity AUC (CTD^2))/docetaxel (CTRP660364) AUC Drug sensitivity AUC (CTD^2) vs MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2).csv")
+triazolothiadiazine <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775 (Drug sensitivity AUC (CTD^2))/triazolothiadiazine (CTRP385240) AUC Drug sensitivity AUC (CTD^2) vs MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2).csv")
+YK_4 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775 (Drug sensitivity AUC (CTD^2))/YK-4-279 (CTRP632103) AUC Drug sensitivity AUC (CTD^2) vs MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2).csv")
+evodiamine <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775 (Drug sensitivity AUC (CTD^2))/evodiamine (CTRP594664) AUC Drug sensitivity AUC (CTD^2) vs MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2).csv")
+
+MK_1775_CTD <- cbind(tivantinib[,1], tivantinib[,2])
+tivantinib <- cbind(tivantinib[,1], tivantinib[,3])
+docetaxel <- cbind(docetaxel[,1], docetaxel[,3])
+triazolothiadiazine <- cbind(triazolothiadiazine[,1], triazolothiadiazine[,3])
+YK_4 <- cbind(YK_4[,1], YK_4[,3])
+evodiamine <- cbind(evodiamine[,1], evodiamine[,3])
+
+MK_dataset_CTD <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(MK_1775_CTD, tivantinib, docetaxel, triazolothiadiazine, YK_4, evodiamine), accumulate = FALSE)
+colnames(MK_dataset_CTD) <- c("ID", "MK1775", "tivantinib", "docetaxel", "triazolothiadiazine", "YK_4", "evodiamine")
+ggpairs(MK_dataset_CTD,
+        title="MK_1775_CTD",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+
+### MK1775 (Drug sensitivity AUC (Sanger GDSC2))
+Wee1_Inhibitor_sanger <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775_Sanger_GDSC2/Wee1 Inhibitor (GDSC21046) AUC Drug sensitivity AUC (Sanger GDSC2) vs MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2) (1).csv")
+AZD7762_sanger <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775_Sanger_GDSC2/AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2) vs MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+YK_4_sanger <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775_Sanger_GDSC2/YK-4-279 (GDSC21239) AUC Drug sensitivity AUC (Sanger GDSC2) vs MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+AZD6738_sanger <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775_Sanger_GDSC2/AZD6738 (GDSC21917) AUC Drug sensitivity AUC (Sanger GDSC2) vs MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+vinblastine_sanger <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/MK1775_Sanger_GDSC2/vinblastine (GDSC21004) AUC Drug sensitivity AUC (Sanger GDSC2) vs MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+
+MK_1775_sangerGDSC2 <- cbind(vinblastine_sanger[,1], vinblastine_sanger[,2])
+Wee1_sanger <- cbind(Wee1_Inhibitor_sanger[,1], Wee1_Inhibitor_sanger[,3])
+AZD7762_sanger <- cbind(AZD7762_sanger[,1], AZD7762_sanger[,3])
+YK_4_sanger <- cbind(YK_4_sanger[,1], YK_4_sanger[,3])
+vinblastine_sanger <- cbind(vinblastine_sanger[,1], vinblastine_sanger[,3])
+AZD6738_sanger <- cbind(AZD6738_sanger[,1], AZD6738_sanger[,3])
+
+MK_dataset_Sanger <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(MK_1775_sangerGDSC2, Wee1_sanger, AZD7762_sanger, AZD6738_sanger, YK_4_sanger, vinorelbine_sanger), accumulate = FALSE)
+colnames(MK_dataset_Sanger) <- c("ID", "MK1775", "Wee1", "AZD7762", "AZD6738", "YK_4", "vinblastine")
+ggpairs(MK_dataset_Sanger,
+        title="MK_1775_Sanger",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+### CP466722 (Drug sensitivity AUC (Sanger GDSC1))
+BX_912 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/CP466722/BX-912 (GDSC1222) AUC Drug sensitivity AUC (Sanger GDSC1) vs CP-466722 (GDSC1152) AUC Drug sensitivity AUC (Sanger GDSC1).csv")
+Genentech <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/CP466722/Genentech Cpd 10 (GDSC1225) AUC Drug sensitivity AUC (Sanger GDSC1) vs CP-466722 (GDSC1152) AUC Drug sensitivity AUC (Sanger GDSC1).csv")
+ZSTK_474 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/CP466722/ZSTK-474 (GDSC1223) AUC Drug sensitivity AUC (Sanger GDSC1) vs CP-466722 (GDSC1152) AUC Drug sensitivity AUC (Sanger GDSC1).csv")
+fedratinib <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/CP466722/fedratinib (GDSC1306) AUC Drug sensitivity AUC (Sanger GDSC1) vs CP-466722 (GDSC1152) AUC Drug sensitivity AUC (Sanger GDSC1).csv")
+Akti_12 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/CP466722/Akti-12 (GDSC1228) AUC Drug sensitivity AUC (Sanger GDSC1) vs CP-466722 (GDSC1152) AUC Drug sensitivity AUC (Sanger GDSC1).csv")
+
+CP466722 <- cbind(Genentech[,1], Genentech[,2])
+Genentech <- cbind(Genentech[,1], Genentech[,3])
+ZSTK_474 <- cbind(ZSTK_474[,1], ZSTK_474[,3])
+fedratinib <- cbind(fedratinib[,1], fedratinib[,3])
+Akti_12 <- cbind(Akti_12[,1], Akti_12[,3])
+BX_912 <- cbind(BX_912[,1], BX_912[,3])
+
+CP_dataset <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(CP466722, Genentech, ZSTK_474, fedratinib, Akti_12, BX_912), accumulate = FALSE)
+colnames(CP_dataset) <- c("ID", "CP466722", "Genentech", "ZSTK_474", "fedratinib", "Akti_12", "BX_912")
+ggpairs(CP_dataset,
+        title="CP466722",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+### KU59933 (Drug sensitivity AUC (CTD^2))
+KU_60019 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/KU59933/KU-60019 (CTRP660411) AUC Drug sensitivity AUC (CTD^2) vs KU-55933 (CTRP58339) AUC Drug sensitivity AUC (CTD^2).csv")
+KU_0060648 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/KU59933/KU 0060648 (CTRP632119) AUC Drug sensitivity AUC (CTD^2) vs KU-55933 (CTRP58339) AUC Drug sensitivity AUC (CTD^2).csv")
+tivantinib_KU59933 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/KU59933/tivantinib (CTRP687406) AUC Drug sensitivity AUC (CTD^2) vs KU-55933 (CTRP58339) AUC Drug sensitivity AUC (CTD^2).csv")
+TPCA_1 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/KU59933/TPCA-1 (CTRP375564) AUC Drug sensitivity AUC (CTD^2) vs KU-55933 (CTRP58339) AUC Drug sensitivity AUC (CTD^2).csv")
+BRD_K30748066 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/KU59933/BRD-K30748066 (CTRP689506) AUC Drug sensitivity AUC (CTD^2) vs KU-55933 (CTRP58339) AUC Drug sensitivity AUC (CTD^2).csv")
+
+KU59933 <- cbind(KU_60019[,1], KU_60019[,2])
+KU_60019 <- cbind(KU_60019[,1], KU_60019[,3])
+KU_0060648 <- cbind(KU_0060648[,1], KU_0060648[,3])
+tivantinib_KU59933 <- cbind(tivantinib_KU59933[,1], tivantinib_KU59933[,3])
+TPCA_1 <- cbind(TPCA_1[,1], TPCA_1[,3])
+BRD_K30748066 <- cbind(BRD_K30748066[,1], BRD_K30748066[,3])
+
+KU59933_dataset <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(KU59933, KU_60019, KU_0060648, tivantinib_KU59933, TPCA_1, BRD_K30748066), accumulate = FALSE)
+colnames(KU59933_dataset) <- c("ID", "KU59933", "KU_60019", "KU_006048", "tivantinib", "TPCA_1", "BRD_K30748066")
+ggpairs(KU59933_dataset,
+        title="KU59933",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+### AZD7762 (Drug sensitivity AUC (CTD^2))
+GSK461364 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/GSK461364 (CTRP649862) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+BRD_K30748066 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/BRD-K30748066 (CTRP689506) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+BRD9876MK_1775 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/BRD9876MK-1775 (41 molmol) (CTRP689136) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+narciclasine <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/narciclasine (CTRP632243) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+teniposide <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/teniposide (CTRP27871) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+MK_1775_AZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_CTD/MK-1775 (CTRP418167) AUC Drug sensitivity AUC (CTD^2) vs AZD7762 (CTRP660777) AUC Drug sensitivity AUC (CTD^2).csv")
+
+AZD7762_CTD <- cbind(GSK461364[,1], GSK461364[,2])
+GSK461364 <- cbind(GSK461364[,1], GSK461364[,3])
+BRD_K30748066 <- cbind(BRD_K30748066[,1], BRD_K30748066[,3])
+BRD9876MK_1775 <- cbind(BRD9876MK_1775[,1], BRD9876MK_1775[,3])
+narciclasine <- cbind(narciclasine[,1], narciclasine[,3])
+teniposide <- cbind(teniposide[,1], teniposide[,3])
+MK_1775_AZD7762 <-cbind(MK_1775_AZD7762[,1], MK_1775_AZD7762[,3])
+
+AZD7762_CTD_dataset <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(AZD7762_CTD ,GSK461364, BRD_K30748066, BRD9876MK_1775, narciclasine, MK_1775_AZD7762), accumulate = FALSE)
+colnames(AZD7762_CTD_dataset) <- c("ID", "AZD7762", "GSK461364", "BRD_K30748066", "BRD9876MK_1775", "narciclasine", "MK1775")
+ggpairs(AZD7762_CTD_dataset,
+        title="AZD7762_CTD",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+### AZD7762 (Drug sensitivity AUC (Sanger GDSC2))
+YK_4_AZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_GDSC2/YK-4-279 (GDSC21239) AUC Drug sensitivity AUC (Sanger GDSC2) vs AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+SCH900776_AZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_GDSC2/SCH900776 (GDSC22046) AUC Drug sensitivity AUC (Sanger GDSC2) vs AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+AZD6738_AZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_GDSC2/AZD6738 (GDSC21917) AUC Drug sensitivity AUC (Sanger GDSC2) vs AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+Wee1_InhibitorAZD7762 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_GDSC2/Wee1 Inhibitor (GDSC21046) AUC Drug sensitivity AUC (Sanger GDSC2) vs AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+MK_1775_AZD7762_GDSC2 <- data.table::fread("/home/yang/DDR_related_Al_drug_research_platform/individual_dataset/AZD7762_GDSC2/MK-1775 (GDSC21179) AUC Drug sensitivity AUC (Sanger GDSC2) vs AZD7762 (GDSC21022) AUC Drug sensitivity AUC (Sanger GDSC2).csv")
+
+AZD7762_GDSC2 <- cbind(YK_4_AZD7762[,1], YK_4_AZD7762[,2])
+YK_4_AZD7762 <- cbind(YK_4_AZD7762[,1], YK_4_AZD7762[,3])
+SCH900776_AZD7762 <- cbind(SCH900776_AZD7762[,1], SCH900776_AZD7762[,3])
+AZD6738_AZD7762 <- cbind(AZD6738_AZD7762[,1], AZD6738_AZD7762[,3])
+Wee1_InhibitorAZD7762 <- cbind(Wee1_InhibitorAZD7762[,1], Wee1_InhibitorAZD7762[,3])
+MK_1775_AZD7762_GDSC2 <- cbind(MK_1775_AZD7762_GDSC2[,1], MK_1775_AZD7762_GDSC2[,3])
+
+AZD7762_GDSC2_dataset <- Reduce(function(x,y) merge(x,y, by = "DepMap ID"), list(AZD7762_GDSC2 , YK_4_AZD7762, SCH900776_AZD7762, AZD6738_AZD7762, Wee1_InhibitorAZD7762, MK_1775_AZD7762_GDSC2), accumulate = FALSE)
+colnames(AZD7762_GDSC2_dataset) <- c("ID", "AZD7762", "YK_4", "SCH900776", "AZD6738", "Wee1_inhibitor", "MK1775")
+ggpairs(AZD7762_GDSC2_dataset,
+        title="AZD7762_GDSC2",
+        columns = c(2:7),
+        mapping=ggplot2::aes(colour = "ID"))
+
+
+
