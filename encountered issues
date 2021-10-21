@@ -1,0 +1,513 @@
+From https://www.youtube.com/watch?v=nRtp7wSEtJA
+R programming for beginners. Manipulate data using the tidyverse: select, filter and mutate.
+
+install.apckages("tidyverse")
+require(tidyverse)
+data()
+view(starwars)
+starwars %>%
+       select(gener, mass, height, species)
+       filter(species == "Human")
+       na.omit() %>%
+       mutate(height = height /100) %>%
+       mutate(BMI = mass / height^2) %>%
+       group_by(gender) %>%
+       summarise(Average_BMI = mean(BMI))
+
+如果第一行是数据，head=T会让第一列数据就会被强制为变量名，head=F则相反，这个需要xlsx包。
+
+如果已经载入数据，数据名为a，那么使用colnames（a）=a[1,]，就可以把a的行名变成a的第一行数据，然后a=a[-1，],删除第一行数据，就可以了。当然如果需要，也可以保留第一行数据。
+Ctrl + Z 撤销上一步操作
+
+许多字符串使用 paste() 函数来组合。它可以将任意数量的参数组合在一起。
+
+c()函数: 将括号中的元素连接起来，并不创建向量
+paste()函数: 连接括号中的元素
+c(1, 2:4)，结果为1 2 3 4
+paste(1, 2:4)，结果为“1 2” “1 3” “1 4”
+c(2, "and")，结果为“2” “and”
+paste(2, "and")，结果为“2 and”
+
+apply函数遇到缺失值
+lapply(df, function(x) quantile(x, probs = 0.9, na.rm = TRUE)
+
+%in%
+判断前面一个向量内的元素是否在后面一个向量中，返回布尔值。
+a <- c(1,3,13,1443,43,43,4,34,3,4,3)
+b <- c(1,13,11,1313,434,1)
+a %in% b
+# 返回内容
+# [1]  TRUE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# 取反操作
+!(a %in% b)
+
+a[a %in% b]
+# 返回内容
+# [1]  1 13
+
+a[!(a %in% b)]
+# 返回内容
+# [1]    3 1443   43   43    4   34    3    4    3
+
+=======================
+删除特定行
+location <- which（dataset$ID== “”）
+dataset <- dataset[-location, ]
+=======================
+选取前1000条数据
+DF[1:1000,]
+
+1、
+给定一个向量c2，要求找到数值大于0的数：
+
+> c2
+ [1] 0.00 0.00 0.00 0.00 0.00 0.00 0.06 0.09 0.20 0.09 0.08 0.14 0.14 0.23
+[15] 0.08 0.06 0.12 0.20 0.14 0.11 0.20 0.14 0.17 0.15 0.18 0.15 0.20 0.12
+[29] 0.23 0.08 0.12 0.08 0.23 0.12 0.08 0.17 0.18 0.17 0.12 0.17 0.14 0.18
+[43] 0.11 0.27 0.06
+> c2[c2>0]
+ [1] 0.06 0.09 0.20 0.09 0.08 0.14 0.14 0.23 0.08 0.06 0.12 0.20 0.14 0.11
+[15] 0.20 0.14 0.17 0.15 0.18 0.15 0.20 0.12 0.23 0.08 0.12 0.08 0.23 0.12
+[29] 0.08 0.17 0.18 0.17 0.12 0.17 0.14 0.18 0.11 0.27 0.06
+>
+
+2、找到了满足条件的数，但如何获取这些数在原向量中的位置（或索引呢）？
+which()函数。首先找到满足大于0的数列:
+
+> c2>0
+ [1] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[13]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[25]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[37]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+
+其次，根据该数列标识，就能找到对应的索引了。
+
+> which(c2>0)
+ [1]  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+[25] 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+
+3、查找判断
+（1）判断至少一个数满足条件
+例如判断向量中至少有一个小于或等于零的数
+
+> any(c2<=0)
+[1] TRUE
+（2）判断所有的数都满足条件
+
+例如判断所有的数都大于0，判断所有的数都大于等于0：
+
+> all(c2>0)
+[1] FALSE
+> all(c2>=0)
+[1] TRUE
+
+R语言中因子(factor)转换成数值型(numeric)的问题
+一直觉得只要是数字，不管是什么类型的，都可以通过as.numeric()函数转换为对应的numeric类型的数字，例如
+x<-“123”，x为character类型，而as.numeric(x)则为numeric类型的123。但是因子(factor)类型却不一样。
+
+      a<-factor(c(100,200,300,301,302,400,10))，它们的值分别为100 200 300 301 302 400 10，然而
+
+as.numeric(a)对应的值并非100 200 300 301 302 400 10，而是2 3 4 5 6 7 1。因子(factor)转换成数值型(numeric)
+的规则是这样的：
+
+     一共有n个数，那么转换后的数字就会在1——n中取值，数字最小的取一，次小的取二，以此类推。
+
+     那么如何让因子(factor)类型里的数值转换对应的数值型呢？
+
+     mean(as.numeric(as.character(factorname)))
+     mean(as.numeric(levels(factorname)[factorname]))
+
+     以上代码都可以实现将因子(factor)类型里的数值转换对应的数值型，思路都是先转换成字符型然后再转换成数值型。
+
+
+使用EnhancedVolcano()语句生成火山图,举例如下：
+
+EnhancedVolcano(data, lab = rownames(data), x = 'Foldchange', y = 'Pvalue',xlim = c(-17, 13),ylim=c(1,6),pCutoff = 0.001,FCcutoff = 2)
+
+参数说明：
+data：导入的数据文件。
+lab = rownames(data)：设置标签，方便展示（此参数须在2.步中设置row.names才能使用）
+x = 'Foldchange'、y = 'Pvalue'：设置横纵坐标轴与data中列的对应
+xlim = c(-17, 13)、ylim=c(1,6)：设置x、y展示区间
+pCutoff = 0.001、FCcutoff = 2：自定义阈值线。
+=========================================================================
+
+交集intersect
+两个向量的交集，集合可以是数字、字符串等
+
+# 两个数值向量取交集
+intersect(x=1:4, y = 2:6)
+# [1] 2 3 4
+
+# 两个字符向量取交集
+intersect(x=letters[1:4], y = letters[2:6])
+# [1] "b" "c" "d"
+
+# 混合向量
+intersect(x=c("a", "b", "c", 4), y = c("a", 2, 3, 4))
+[1] "a" "4"
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+并集union
+求两个向量的并集，集合可以是任何数值类型
+
+# 两个数值向量取并集
+union(x=1:4, y = 2:6)
+# [1] 1 2 3 4 5 6
+
+# 两个字符向量取并集
+union(x=letters[1:4], y = letters[2:6])
+# [1] "a" "b" "c" "d" "e" "f"
+
+# 混合向量
+union(x=c("a", "b", "c", 4), y = c("a", 2, 3, 4))
+[1] "a" "b" "c" "4" "2" "3"
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+找不同setdiff
+求向量x与向量y中不同的元素(只取x中不同的元素)
+setdiff(x, y)
+
+x = 1:4
+y = 2:6
+# 找x中不同于y的元素
+setdiff(x, y)
+# [1] 1
+# 找y中不同于x的元素
+setdiff(y, x)
+# [1] 5 6
+1
+2
+3
+4
+5
+6
+7
+8
+判断相同setequal
+x = 1:4
+y = 2:6
+# 判断x与y是否相同，结果为假
+setequal(x, y)
+# [1] FALSE
+# 找y与x是否相同，结果为假
+setequal(y, x)
+# [1] FALSE
+
+# 只有完全相同的才返回TRUE
+y = 1:4
+setequal(x, y)
+# [1] TRUE
+
+R语言，怎么去除字符串中括号内的内容，比如，怎么去除abc（def）中（def），剩下abc
+gsub("\\(.*\\)","",字符串)
+正则表达
+\\(\\)表示括号
+. 代表任意字符 * 匹配0或多个正好在它之前的那个字符
+.*意味着能够匹配任意数量的任何字符
+
+
+# sor()排序，排序结果不可逆转
+# 默认是升序
+# 注意，排序的某个字段--"总成绩"
+# decreasing为TRUE，表示降序
+# decreasing为FALSE，表示升序
+sort(cj$总成绩,decreasing=TRUE)
+# 表格不受影响
+View(cj)
+
+# order()排序的是索引，利用索引进行表格显示
+cj[order(cj$总成绩),]
+# order()默认是升序，前面加“-”号，表示降序
+# 注意“，”不能省略
+# 利用索引值，表格受影响
+View(cj[order(-cj$总成绩),])
+————————————————
+原文链接：https://blog.csdn.net/mr_muli/article/details/79691720
+=========================================================================
+
+
+require(tidyverse)
+library(magrittr)
+library(dplyr)
+library(hash)
+
+## 从mutation数据集中筛选出名为BRCA2基因的ID
+select_BRAC2<-CCLE_mutations_1_ %>%
+  select(Hugo_Symbol, DepMap_ID) %>%
+  filter(Hugo_Symbol == "BRCA2") 
+
+## 从cell line sample information数据集中筛选出Breast Cancer的ID与cell line name  
+select_BreastCancer<-cell_line_sample_info %>%
+  select(DepMap_ID, primary_disease, cell_line_name) %>%
+  filter(primary_disease == "Breast Cancer")
+
+## 转为vector（向量）- BRAC2
+matrix1_BRAC2 <- select_BRAC2[,2]
+matrix2_BRAC2 <- as.matrix(matrix1_BRAC2)
+vector1_BRAC2 <- as.vector(matrix2_BRAC2)
+
+## 转为vector（向量）- Breast Cancer
+matrix1_Breast_Cancer <- select_BreastCancer[,1]
+matrix2_Breast_Cancer <- as.matrix(matrix1_Breast_Cancer)
+vector1_Breast_Cancer <- as.vector(matrix2_Breast_Cancer)
+
+## 找交集
+intersection <- intersect(vector1_BRAC2, vector1_Breast_Cancer)
+
+dict = hash(keys = c(select_BreastCancer[,1]), values = c(select_BreastCancer[,3]))
+
+select_BreastCancer[select_BreastCancer$DepMap_ID %in% intersection,]
+combination_information <- paste(select_BreastCancer[,"DepMap_ID"], select_BreastCancer[,"cell_line_name"])
+
+combination_information <- paste(as.character(select_BreastCancer[,"DepMap_ID"]), as.character(select_BreastCancer[,"cell_line_name"]), sep="")
+
+## merge acquired information  注意逗号---代表行
+BRAC2_BC_merging_1 <- select_BreastCancer[select_BreastCancer$DepMap_ID %in% intersection,]
+BRAC2_BC_merging_2 <- select_BRAC2[select_BRAC2$DepMap_ID %in% intersection,]
+BRAC2_BC_merging <- merge(BRAC2_BC_merging_1, BRAC2_BC_merging_2)
+BRAC2_BC_merging <- BRAC2_BC_merging %>% select(DepMap_ID, primary_disease, Hugo_Symbol, everything())
+
+
+setwd("/home/yang/testing")
+write.csv(x = BRAC2_BC_merging, file = "BRAC2_Breast_Cancer.csv")
+
+============================================================================================
+============================================================================================
+
+调换数据框列的位置
+dt <- data.frame(v1=1:3,
+                 v2=4:6,
+                 v3=letters[1:3],
+                 v4=LETTERS[1:3])
+dt
+dt1 <- dt[,c(1,4,3,2)]
+dt1
+dt1 <- dt[,c(1：20， 23，22，21，24：50)]  21，22，23换位，其余不动
+
+dplyr::select()
+dat %>% select(x1, x3, x3, x4)
+dat %>% select(x1, x3, x2, x4, everything())
+
+
+==============================================================================================
+
+require(tidyverse)
+library(magrittr)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+library(EnhancedVolcano)
+library(raster)
+library(stringr)
+CRISPR_gene_effect <- read_excel("CRISPR_gene_effect.xlsx", 
+                                 na = "NA")
+
+CCLE_expression <- read_excel("CCLE_expression.xlsx", 
+                              na = "NA")
+## TIPARP_CRISPR_DepMap_21Q2_Public_Score_CERES_ <- read_excel("~/PARP7_polq/TIPARP CRISPR (DepMap 21Q2 Public+Score CERES).xlsx")
+## colnames(TIPARP_CRISPR_DepMap_21Q2_Public_Score_CERES_)[2] <- c("CRISPR")
+colnames(CRISPR_gene_effect)[1] <- c("ID")
+colnames(CCLE_expression)[1] <- c("ID")
+
+
+#########核心参数##########
+gene_name<- "CHEK1"
+database<-"CRISPR"
+p_value<-0.05
+if(database=="CRISPR"){
+  Use_data<-CRISPR_gene_effect
+}
+if(database=="RNAi"){
+  Use_data<-D2_combined_gene_dep_scores_1_
+}
+if(database=="Drug"){
+  Use_data<-primary_screen_replicate_collapsed_logfold_change
+}
+
+
+if(p_value==0.05){
+  pCutoff<-0.05
+}
+if(p_value==0.01){
+  pCutoff<-0.01
+}
+
+colnames(Use_data)[1] <- c("ID")
+colnames(Use_data) <- gsub(".\\(.*\\)","",colnames(Use_data))
+
+## 挑出目的基因的数据 (ID, cell line)
+select_gene<-Use_data %>%
+  select(ID, Use_gene)
+colnames(select_gene)[2] <- c("CRISPR")
+select_gene <- na.omit(select_gene)
+
+## 挑出目的基因的数据 此处为CHK1
+select_gene<-CRISPR_gene_effect %>%
+  select(ID, `A2M (2)`) 
+colnames(select_gene)[2] <- c("CRISPR")
+
+## 确定前后5%的表达界限
+boundary_top <- quantile(as.numeric(select_gene$CRISPR),prob=1-95/100)
+boundary_bottom <- quantile(as.numeric(select_gene$CRISPR),prob=1-5/100)
+
+## data[data$V2 > quantile(data$V2,prob=1-n/100),] 模板
+## 筛选前后5%高低表达
+select_top<-select_gene %>%
+  select('ID', CRISPR) %>%
+  dplyr::filter(CRISPR < boundary_top) 
+select_bottom<-select_gene %>%
+  select('ID', CRISPR) %>%
+  dplyr::filter(CRISPR > boundary_bottom)
+  
+## 转为vector（向量）- top
+matrix1_top <- select_top[,1]
+matrix2_top <- as.matrix(matrix1_top)
+vector1_top <- as.vector(matrix2_top)
+
+## 转为vector（向量）- bottom
+matrix1_bottom <- select_bottom[,1]
+matrix2_bottom <- as.matrix(matrix1_bottom)
+vector1_bottom <- as.vector(matrix2_bottom)
+
+
+## 筛选行
+merging_top1 <- CCLE_expression[CCLE_expression$ID %in% vector1_top,]
+merging_bottom1 <- CCLE_expression[CCLE_expression$ID %in% vector1_bottom,]
+
+## 把ID作为rowname，融合top&bottom数据库
+rownames(merging_top1) = merging_top1$ID
+merging_top2 <- merging_top1[,-1]
+rownames(merging_bottom1) = merging_bottom1$ID
+merging_bottom2 <- merging_bottom1[,-1]
+topbottom <- rbind(merging_top2, merging_bottom2)
+
+## 循环执行T test
+x <- as.data.frame(matrix(0,length(merging_bottom2),3))
+for(i in 1:length(merging_bottom2)){
+  a <- na.omit(as.matrix(merging_top2[,i]))
+  b <- na.omit(as.matrix(merging_bottom2[,i]))
+  t <- t.test(a,b)
+  t$p.value->x[i,1]
+  (2^mean(a)-1)/(2^mean(b)-1)->x[i,2]
+  colnames(merging_bottom2)[i]->x[i,3]
+}
+
+
+##
+na.omit(x)->x
+x[x[,2]!="Inf" & x[,2]!="0",]->x
+log2(as.numeric(x[,2]))->x[,2]
+str_extract(x[,3], "\\w+")->x[,4]
+
+colnames(x)<-c("pvalue","log2FoldChange","gene","p.adj")
+row.names(x)<-x[,3]
+as.numeric(x$log2FoldChange)->x$log2FoldChange
+
+
+## 设定p value与FC的cutoff阈值
+pCutoff = 0.01
+FCcutoff =1
+
+## 火山图
+EnhancedVolcano(x,
+                lab= x[,4],
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                pCutoff = pCutoff,
+                FCcutoff = FCcutoff,
+                labSize=3,
+                title="Sensitve vs Insensitve")
+
+## 获取上调基因
+select_x<-x %>%
+  select(pvalue, log2FoldChange, gene_adj) %>%
+  dplyr::filter(pvalue < pCutoff & log2FoldChange >FCcutoff)
+
+## 获取下调基因
+select_y<-x %>%
+  select(pvalue, log2FoldChange, gene_adj) %>%
+  dplyr::filter(pvalue < pCutoff & log2FoldChange <FCcutoff)
+
+
+library(BiocManager)
+library(DOSE)
+library(org.Hs.eg.db)
+library(topGO)
+library(clusterProfiler)
+library(pathview)
+
+#单列基因名文件
+data <-as.data.frame(select_x$gene_adj)   
+#需要character格式，然后进行ID转化
+colnames(data) <- c('V1')
+data$V1<- as.character(data$V1) 
+#将SYMBOL格式转为ENSEMBL和ENTERZID格式 
+test1 = bitr(data$V1, fromType="SYMBOL", toType=c("ENSEMBL", "ENTREZID"), OrgDb="org.Hs.eg.db")
+head(test1,2)
+
+#富集分析的背景基因集
+data(geneList, package="DOSE") 
+gene <- names(geneList)[abs(geneList) > 2]
+gene.df <- bitr(gene, fromType = "ENTREZID", toType = c("ENSEMBL", "SYMBOL"), OrgDb = org.Hs.eg.db)
+head(gene.df,2)
+
+## groupGO富集分析
+ggo <- groupGO(gene = test1$ENTREZID, OrgDb = org.Hs.eg.db, ont = "CC",level = 3,readable = TRUE)
+
+## enrichGO富集分析
+ego_ALL <- enrichGO(gene = test1$ENTREZID, 
+                    universe = names(geneList), #背景基因集
+                    OrgDb = org.Hs.eg.db, #没有organism="human"，改为OrgDb=org.Hs.eg.db
+                    #keytype = 'ENSEMBL',
+                    ont = "ALL", #也可以是 CC  BP  MF中的一种
+                    pAdjustMethod = "BH", #矫正方式 holm”, “hochberg”, “hommel”, “bonferroni”, “BH”, “BY”, “fdr”, “none”中的一种
+                    pvalueCutoff = 1, #P值会过滤掉很多，可以全部输出
+                    qvalueCutoff = 1,
+                    readable = TRUE) #Gene ID 转成gene Symbol ，易读
+head(ego_ALL,2)
+
+## setReadable函数进行转化
+ego_MF <- enrichGO(gene = test1$ENTREZID, universe = names(geneList),OrgDb = org.Hs.eg.db,ont = "MF", pAdjustMethod = "BH",pvalueCutoff = 1,qvalueCutoff = 1,readable = FALSE)
+ego_MF1 <- setReadable(ego_MF, OrgDb = org.Hs.eg.db)
+
+## 输出结果
+##write.csv(summary(ego_ALL),"ALL-enrich.csv",row.names =FALSE)
+
+## 绘制图形
+##可视化--点图
+##dotplot(ego_MF,title="EnrichmentGO_MF_dot")#点图，按富集的数从大到小的
+##可视化--条形图
+barplot(ego_MF, showCategory=20,title="EnrichmentGO_ATM_up_regulation")#条状图，按p从小到大排，绘制前20个Term
+##plotGOgraph(ego_MF)
+=============================================================================================
+=============================================================================================
+if(database=="RNAi"){
+  Use_data<-RNAi_database
+  colnames(Use_data) <- gsub(".\\(.*\\)","",colnames(Use_data))
+  select_information <- sample_info_1_ %>%
+    select(DepMap_ID, CCLE_Name)
+  rowname_RNAi <- as.data.frame(rownames(Use_data))
+  for(i in 1:dim(rowname_RNAi)[1] ){
+    q<-select_information[select_information$CCLE_Name==rowname_RNAi[i,1],1]
+    Use_data[i,"ID"]<-as.character(q)
+  }
+}
