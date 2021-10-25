@@ -1,0 +1,22 @@
+### For reference: https://www.youtube.com/watch?v=AY9PYzJtCNA ###
+
+library(tidyverse)
+library(GGally)
+
+data ＜- mtcars
+
+# Scatter plot matrix in base R
+pairs(~ mpg + hp + cyl + wt, data = data, 
+              lower.panel = panel.smooth)
+
+# Scatter plot matrix with GGally
+data %＞% ggpairs(columns = c("mpg", "hp", "cyl", "wt"),
+                upper = list(continuous = wrap('cor', size = 8)))
+
+# Scatter plot matrix with GGally, coloring by cyl
+data %＞% mutate(cyl = factor(cyl)) %＞%
+         ggpairs(columns = c("mpg", "hp", "wt", "cyl"), 
+                 aes(color = cyl),
+                 upper = list(continuous = wrap('cor', size = 5)),
+                 lower = list(combo = wrap("facethist", bins = 30)),
+                 diag = list(continuous = wrap("densityDiag", alpha = 0.5)))
