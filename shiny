@@ -141,3 +141,112 @@ tableOutput() is most useful for small, fixed summaries (e.g. model coefficients
 
 2.3.3 Plots
 You can display any type of R graphic(base, ggplot2, o otherwise) with plotOutput() and renderPlot()
+
+
+2.3.3 Plots
+You can display any type of R graphic(base, ggplot2, o otherwise) with plotOutput() and renderPlot()
+> ui <- fluidpage(
+      plotOutput("plot", width = "400px")
+)
+> server <- function(input, output, session){
+      output$plot <- renderPlot(plot(1:5),res=96)
+}
+
+By default, plotOutput() will take up the full width of its container, and will be 400 pixels high. You can override these defaults with the height and width arguments. We recommend always setting res = 96 as that will make the shiny plots match what you see in RStudio as closely as possible.
+
+Plots are special because they are outputs that can also act as inputs. plotOutput() has a number of arguments like click = "plot_click", they'll create a reactive input (input$plot_click) that you can use to handle user interaction on the plot, e.g. clicking on the plot.
+
+2.3.4 Downloads
+You can let the user download a file with downloadButton() or downloadLink(). 
+
+3 Basic reactivity
+Just like any other R function, when the server function is called it creates a new local environment that is independent of every other invocation of the function. This allows each session to have a unique state, as well as isolating the variables created inside the function.
+
+3.2.1 Input
+The input argument is a list-like object that contains all the input data sent from the browser, named according to the input ID. For example, if your UI contains a numeric input control with an input ID of count:
+
+> ui <- fluidPage(
+    numericInput("count", label = "Number of values", value = 100)
+)
+
+Then you can access the value of that input with input$count. It will initially contain the value 100, and it will be automatically updated as the user changes the value in the browser.
+Unlike a typical list, input objects are read-only. If you attempt to modify an input inside the server function, you'll get an error.
+> server <- function(input, output, session){
+    input$count <- 10
+}
+#> Error: cannot modify read-only reactive value 'count'
+
+This error occurs because input reflects what's happening in the browser, and the browser is shiny's "single source of truth". If you could modify the value in R, you could introduce inconsistencies, where the input slider said one thing in the browser, and input$count said something different in R. That would make programming challenging! Functions like updateNumericInput() can modify the value in the browser, and then input$count will update accordingly.
+
+One more important thing about input:it's selective about who is allowed to read it. To read from an input, you must be in a reactive context created by a function like renderText() or reactive(). It's an important constant that allows outputs to automatically update when an input changes. This code illustrates the error if make this mistake:
+
+> server <- function(input, output, session){
+    message("The value of input$count is", input$count)
+}
+> shinyApp(ui, server)
+#> Error: cannot access reactive value 'count' outside of reactive consumer
+
+3.2.2 Output
+Output is very similar to input: it's also a list-like object named according to the output ID. The main difference is that you use the output object in concert with a render function, as in the following simple example: (note that the ID is quoted in the UI, but not in the server)
+
+> ui <- fluidPage(
+    textOutput("greeting")
+)
+> server <- function(input, output, session){
+    output$greeting <- renderText("Hello human!")
+}
+
+The render function does two things:
+It sets up a special reactive context that automatically tracks what inputs the output uses.
+It converts the output of your R code into HTML suitable for display on a web page.
+Like the inout, the output is picky about how you use it, you'll get an error if forget the render function.
+
+3.3 Reactive programming
+An app is going to be pretty boring if it only has inputs or only has outputs. The real magic of shiny happens when you have an app with both. The greeting updates automatically as you type.
+
+> ui <- fluidPage(
+   textInput("name", "What's your name?")
+   textOutput("greeting")
+)
+> server <- function(input, output, session){
+   output$greeting <- renderText({
+      paste0("Hello", input$name, "!")
+   })
+}
+
+This is the big idea in shiny: you don't need to tell an output when to update, because shiny automatically figures it out for you.
+
+The app works because the code doesn't tell shiny to create the string and send it to the browser, but instead, it informs shiny how it could create the string if it needs to.
+
+3.3.1 Imperative vs declarative programming
+This difference between commands and recipes is one of the key differences between two important styles of programming:
+In imperative programming, you issue a specific command and it's carried out immediately. This is the type of programming you're used to in your analysis scripts: you command R to load your data, transform it, visualse it, and save the results to disk.
+In declarative programming, you express higher-level goals or describe important constraints, and rely on someone else to decide how and/or when to translate that into action. This is the style of programming you use in shiny.
+
+3.3.2 Laziness
+One of the strengths of declarative programming in shiny is that it allows apps to be extremely lazy.  
+A shiny app will only ever do the minimal amount of work needed to update the output controls that you can currently see. This laziness, however, comes with an important downside that you should be aware of. 
+If you are working on a shiny app and you just can't figure out why your code never gets run, double check that your UI and server functions are using the same identifiers.
+
+3.3.3 The reactive graph
+Shiny's laziness has another important property. In most r code, you can understand the order of execution by reading the code from top to bottom. That doesn't work in shiny, because code is only run when needed. To understand the order of execution you need to instead look at the reactive graph, which describes how inputs and outputs are connected. The reactive graph for the app above is very simple and shown here: name -> greeting
+
+The reactive graph contains one symbol for every input and output, and we connect an input to an output whenever the output accesses the input. This graph tells you that greeting will need to be recomputed whenever name is changed. We'll often describe this relationship as greeting has a reactive dependency on name.
+
+The reactive graph is a powerful tool for understanding how you app works. As your app gets more complicated, it's often useful to make a quick high-level sketch of the reactive graph to remind you how all the pieces felt together.
+
+3.3.4 Reactive expressions
+There's one more important component that you'll see in the reactive graph: the reactive expression. For now think of them as a tool that reduces duplication in your reactive code by introducing additional nodes into the reactive graph. name -> string -> greeting
+Reactive expressions take inputs and produce outputs so they have a shape that combines features of both inputs and outputs.
+
+3.3.5 Execution order
+It's important to understand that the order your code run is solely determined by the reactive graph. This is different from most r code where the execution order is determined by the order of lines.
+
+3.4 Reactive expressions
+Reaction expressions have a flavor of both inputs and outputs:
+Like inputs, you can use the results of a reactive expression in an output.
+Like outputs, reactive expressions depend on inputs and automatically know when they need updating.
+This duality means we need some new vocabulary: I'll use producers to refer to reactive inputs and expressions, and consumers to refer to reactive expressions and outputs.
+
+3.4.1 The motivation
+
