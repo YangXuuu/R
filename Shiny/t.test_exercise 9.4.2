@@ -1,0 +1,7 @@
+Create an app that lets you upload a csv file, select a variable, and then perform a t.test() on that variable. 
+After the user has uploaded the csv file, you'll need to use updateSelectInput() to fill in the available variables. See section 10.1 for details.
+
+We can use the fileInput widget with the accept argument set to .csv to allow only the upload of csv files. In the server function we save the uploaded data to the
+data reactive and use it to update input$variable, which displays variable (i.e. numeric data column) choices. Note that we put the updateSelectInput within an observe
+event because we need the input$variable to change if the user selects another file.
+
