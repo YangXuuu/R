@@ -1,0 +1,6 @@
+Exercise 9.4.3
+Create an app that lets the user upload a csv file, select one variable, draw a histogram, and then download the histogram.
+For an additional challenge, allow the user to select from .png, .pdf, and .svg output formats.
+
+Solution. 
+Adapting the code from the example above, rather than print a t-test output, we save the plot in a reactive and use it to display the plot/download. We can use the ggsave function to switch between input$extension types.
